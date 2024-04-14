@@ -18,7 +18,8 @@ var (
 )
 
 type Config struct {
-	Port int `env:"PORT" validate:"required"`
+	Port        int    `env:"PORT" validate:"required"`
+	DatabaseURL string `env:"DATABASE_URL" validate:"required"`
 }
 
 func LoadConfig() (Config, error) {

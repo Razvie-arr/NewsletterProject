@@ -7,6 +7,10 @@ type Service struct {
 	repository Repository
 }
 
-func NewService() (Service, error) {
-	return Service{}, nil
+func NewService(
+	repository Repository,
+) (Service, error) {
+	return Service{
+		repository: repository,
+	}, nil
 }

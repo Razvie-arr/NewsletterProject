@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
+	"newsletterProject/repository"
 
 	"newsletterProject/service"
 	"newsletterProject/transport/api"
@@ -19,8 +21,18 @@ func main() {
 	cfg := MustLoadConfig()
 	util.SetServerLogLevel(slog.LevelInfo)
 
+	database, err := setupDatabase(ctx, cfg)
+	if err != nil {
+		slog.Error("initializing database", slog.Any("error", err))
+	}
+	repo, err := repository.New(database)
+	if err != nil {
+		slog.Error("initializing repository", slog.Any("error", err))
+	}
+
 	controller, err := setupController(
 		cfg,
+		repo,
 	)
 	if err != nil {
 		slog.Error("initializing controller", slog.Any("error", err))
@@ -49,11 +61,24 @@ func main() {
 	}
 }
 
+func setupDatabase(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
+	// Initialize the database connection pool.
+	pool, err := pgxpool.New(
+		ctx,
+		cfg.DatabaseURL,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return pool, nil
+}
+
 func setupController(
 	_ Config,
+	repository service.Repository,
 ) (*api.Controller, error) {
 	// Initialize the service.
-	svc, err := service.NewService()
+	svc, err := service.NewService(repository)
 	if err != nil {
 		return nil, fmt.Errorf("initializing user service: %w", err)
 	}

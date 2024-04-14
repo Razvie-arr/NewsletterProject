@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS subscriber
+(
+    id    BIGINT PRIMARY KEY,
+    email VARCHAR(250) NOT NULL
+);
