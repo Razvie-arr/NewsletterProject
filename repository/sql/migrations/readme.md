@@ -1,6 +1,6 @@
 - create url for your postgre 
 ```jsx
-export POSTGRESQL_URL='postgres://login:password@localhost:5432/postgres?sslmode=disable' 
+export POSTGRESQL_URL='postgres://login:password@localhost:database_port/database_name?sslmode=disable' 
 ```
 - run up all migrations
 
