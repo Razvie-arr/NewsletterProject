@@ -8,6 +8,7 @@ import (
 
 type Repository interface {
 	ReadEditor(ctx context.Context, editorId id.ID) (*model.Editor, error)
+	ReadEditorByEmail(ctx context.Context, email string) (*model.Editor, error)
 }
 
 type Service struct {

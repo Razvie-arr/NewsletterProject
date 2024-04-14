@@ -1,0 +1,1 @@
+DELETE FROM editor WHERE email = 'example@gmail.com';

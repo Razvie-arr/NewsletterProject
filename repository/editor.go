@@ -29,10 +29,34 @@ func (r *EditorRepository) ReadEditor(ctx context.Context, editorId id.ID) (*mod
 		&editor,
 		query.ReadEditor,
 		pgx.NamedArgs{
-			"id": editor,
+			"id": editorId,
 		},
 	); err != nil {
 		return nil, err
 	}
-	return &model.Editor{}, nil
+	return &model.Editor{
+		ID:       editor.Id,
+		Email:    editor.Email,
+		Password: editor.Password,
+	}, nil
+}
+
+func (r *EditorRepository) ReadEditorByEmail(ctx context.Context, email string) (*model.Editor, error) {
+	var editor dbmodel.Editor
+	if err := pgxscan.Get(
+		ctx,
+		r.pool,
+		&editor,
+		query.ReadEditorByEmail,
+		pgx.NamedArgs{
+			"email": email,
+		},
+	); err != nil {
+		return nil, err
+	}
+	return &model.Editor{
+		ID:       editor.Id,
+		Email:    editor.Email,
+		Password: editor.Password,
+	}, nil
 }

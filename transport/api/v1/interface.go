@@ -8,4 +8,5 @@ import (
 
 type Service interface {
 	GetEditor(ctx context.Context, editorId id.ID) (*svcmodel.Editor, error)
+	GetEditorByEmail(ctx context.Context, email string) (*svcmodel.Editor, error)
 }

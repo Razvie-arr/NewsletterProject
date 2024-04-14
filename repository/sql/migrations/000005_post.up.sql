@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS post
 (
-    id            BIGINT PRIMARY KEY,
+    id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     content       TEXT NOT NULL,
-    newsletter_id BIGINT REFERENCES newsletter (id)
+    newsletter_id uuid REFERENCES newsletter (id)
 );
