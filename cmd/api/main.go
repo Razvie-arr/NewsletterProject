@@ -80,7 +80,7 @@ func setupController(
 	// Initialize the service.
 	svc, err := service.NewService(repository)
 	if err != nil {
-		return nil, fmt.Errorf("initializing user service: %w", err)
+		return nil, fmt.Errorf("initializing editor service: %w", err)
 	}
 
 	// Initialize the controller.

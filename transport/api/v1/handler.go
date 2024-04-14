@@ -21,7 +21,10 @@ func NewHandler(
 func (h *Handler) initRouter() {
 	r := chi.NewRouter()
 
-	// here should be routes
+	// TODO: Setup middleware.
 
+	r.Route("/editor", func(r chi.Router) {
+		r.Post("/login", h.Login)
+	})
 	h.Mux = r
 }
