@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Confirmation</title>
+    <style>
+        /* CSS styles for email content */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #333333;
+        }
+        .message {
+            margin-bottom: 20px;
+        }
+        .footer {
+            margin-top: 20px;
+            color: #777777;
+        }
+        .footer a {
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Subscription Confirmation</h1>
+    </div>
+    <div class="message">
+        <p>Dear Subscriber,</p>
+        <p>You have successfully subscribed to {{.NewsletterName}}.</p>
+        <p>Now you will receive the latest news and updates from this newsletter.</p>
+        <h5>
+            Description of the newsletter:
+        </h5>
+        <p>{{.NewsletterDescription}}</p>
+        <hr>
+        <p>This newsletter is curated by {{.EditorMail}}. Feel free to contact them if you have any questions or feedback.</p>
+    </div>
+    <div class="footer">
+        <!--- TODO: change to not localhost (also won't work if port is different) --->
+        <p>If you wish to unsubscribe from this newsletter, please click <a href="http://localhost:8080/api/v1/newsletter/unsubscribe?newsletterId={{.NewsletterId}}&email={{.SubscriberEmail}}&verificationString={{.VerificationString}}">here</a>.</p>
+    </div>
+</div>
+</body>
+</html>

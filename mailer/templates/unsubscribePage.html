@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unsubscribe Confirmation</title>
+    <style>
+        /* CSS styles for the unsubscribe confirmation page */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #333333;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .btn-confirm {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-confirm:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Unsubscribe Confirmation</h1>
+    </div>
+    <div class="question">
+        <p>Are you sure you want to unsubscribe from the newsletter?</p>
+    </div>
+    <button class="btn-confirm" onclick="confirmUnsubscribe('{{.NewsletterId}}', '{{.SubscriberEmail}}', '{{.VerificationString}}')">Confirm Unsubscribe</button>
+</div>
+
+<script>
+    function confirmUnsubscribe(newsletterId, email, verificationString) {
+        // TODO: change to not localhost (also won't work if port is different)
+        const url = `http://localhost:8080/api/v1/subscription/${newsletterId}`;
+        const bodyParams = {
+            email,
+            verificationString,
+        };
+
+        // Send the DELETE request
+        fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(bodyParams)
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('You have been successfully unsubscribed from the newsletter.');
+                    // Close current tab
+                    window.close();
+                } else {
+                    alert('Failed to unsubscribe. Please try again later.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An unexpected error occurred. Please try again later.');
+            });
+    }
+</script>
+</body>
+</html>
