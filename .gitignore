@@ -1,2 +1,10 @@
 .env
+.env.local
+
+# GoLand
 .idea
+*.iml
+
+# Output of the Go build
+/bin/
+/pkg/

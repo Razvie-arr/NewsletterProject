@@ -21,6 +21,7 @@ type Config struct {
 	Port         int    `env:"PORT" validate:"required"`
 	DatabaseURL  string `env:"DATABASE_URL" validate:"required"`
 	ResendApiKey string `env:"RESEND_API_KEY" validate:"required"`
+	SupabaseAuthSecret string `env:"SUPABASE_AUTH_SECRET" validate:"required"`
 }
 
 func LoadConfig() (Config, error) {
@@ -52,5 +53,7 @@ func loaddotenv(path string) {
 
 		_ = godotenv.Load(dotenvPath)
 		_ = godotenv.Load(dotenvPath + ".common")
+		// Load local environment settings which may override previous settings
+		_ = godotenv.Load(path + ".local") //
 	})
 }

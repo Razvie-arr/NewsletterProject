@@ -1,18 +1,24 @@
 package v1
 
-import "github.com/go-chi/chi"
+import (
+	"github.com/go-chi/chi"
+	"newsletterProject/transport/middleware"
+)
 
 type Handler struct {
 	*chi.Mux
 
-	service Service
+	authenticator middleware.Authenticator
+	service       Service
 }
 
 func NewHandler(
+	authenticator middleware.Authenticator,
 	service Service,
 ) *Handler {
 	h := &Handler{
-		service: service,
+		authenticator: authenticator,
+		service:       service,
 	}
 	h.initRouter()
 	return h
@@ -21,10 +27,15 @@ func NewHandler(
 func (h *Handler) initRouter() {
 	r := chi.NewRouter()
 
-	// TODO: Setup middleware.
+	authenticate := middleware.NewAuthenticate(h.authenticator)
 
 	r.Route("/editor", func(r chi.Router) {
-		r.Post("/login", h.Login)
+		r.Post("/register", h.Register)
+		r.With(authenticate).Post("/login", h.Login)
+	})
+
+	r.Route("/test", func(r chi.Router) {
+		r.With(authenticate).Get("/", h.Test)
 	})
 
 	r.Route("/subscription", func(r chi.Router) {

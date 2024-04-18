@@ -7,8 +7,9 @@ import (
 	"newsletterProject/transport/util"
 )
 
+var transportEditor apiEditor.Editor
+
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
-	var transportEditor apiEditor.Editor
 	err := json.NewDecoder(r.Body).Decode(&transportEditor)
 	if err != nil {
 		util.WriteResponse(w, http.StatusBadRequest, "Corrupted data")
@@ -20,13 +21,19 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: authorization with JWT token
-
 	// testing
 	if editor.Password == transportEditor.Password {
 		util.WriteResponse(w, http.StatusOK, "Correct password")
 	} else {
 		util.WriteResponse(w, http.StatusNotFound, "Incorrect password")
 	}
+	return
+}
+func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
+	//TODO: Send OTP to supabase
+}
+
+func (h *Handler) Test(w http.ResponseWriter, _ *http.Request) {
+	util.WriteResponse(w, http.StatusAccepted, "This seems to work...")
 	return
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
 	"newsletterProject/mailer"
+	"newsletterProject/pkg/authenticator"
 	"newsletterProject/repository"
 
 	"newsletterProject/service"
@@ -87,8 +88,11 @@ func setupController(
 		return nil, fmt.Errorf("initializing editor service: %w", err)
 	}
 
+	authenticator := authenticator.NewJWTAuthenticator(cfg.SupabaseAuthSecret)
+
 	// Initialize the controller.
 	controller, err := api.NewController(
+		authenticator,
 		svc,
 		version,
 	)
