@@ -18,8 +18,9 @@ var (
 )
 
 type Config struct {
-	Port        int    `env:"PORT" validate:"required"`
-	DatabaseURL string `env:"DATABASE_URL" validate:"required"`
+	Port         int    `env:"PORT" validate:"required"`
+	DatabaseURL  string `env:"DATABASE_URL" validate:"required"`
+	ResendApiKey string `env:"RESEND_API_KEY" validate:"required"`
 }
 
 func LoadConfig() (Config, error) {

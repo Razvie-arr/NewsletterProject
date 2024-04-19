@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
+	"newsletterProject/mailer"
 	"newsletterProject/repository"
 
 	"newsletterProject/service"
@@ -29,10 +30,12 @@ func main() {
 	if err != nil {
 		slog.Error("initializing repository", slog.Any("error", err))
 	}
+	resendMailer := mailer.NewResendMailer(cfg.ResendApiKey)
 
 	controller, err := setupController(
 		cfg,
 		repo,
+		resendMailer,
 	)
 	if err != nil {
 		slog.Error("initializing controller", slog.Any("error", err))
@@ -76,9 +79,10 @@ func setupDatabase(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
 func setupController(
 	_ Config,
 	repository service.Repository,
+	mailer mailer.Mailer,
 ) (*api.Controller, error) {
 	// Initialize the service.
-	svc, err := service.NewService(repository)
+	svc, err := service.NewService(repository, mailer)
 	if err != nil {
 		return nil, fmt.Errorf("initializing editor service: %w", err)
 	}
