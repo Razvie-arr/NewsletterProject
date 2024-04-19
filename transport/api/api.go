@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"newsletterProject/transport/middleware"
 
 	apiv1 "newsletterProject/transport/api/v1"
 
@@ -21,17 +22,20 @@ var OpenAPI []byte
 type Controller struct {
 	*chi.Mux
 
-	service apiv1.Service
-	version string
+	authenticator middleware.Authenticator
+	service       apiv1.Service
+	version       string
 }
 
 func NewController(
+	authenticator middleware.Authenticator,
 	service apiv1.Service,
 	version string,
 ) (*Controller, error) {
 	controller := &Controller{
-		service: service,
-		version: version,
+		authenticator: authenticator,
+		service:       service,
+		version:       version,
 	}
 	controller.initRouter()
 	return controller, nil
@@ -47,6 +51,7 @@ func (c *Controller) initRouter() {
 		// authenticate := middleware.Authenticate(c.logger, c.tokenParser)
 
 		v1Handler := apiv1.NewHandler(
+			c.authenticator,
 			c.service,
 		)
 

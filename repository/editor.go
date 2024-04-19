@@ -2,11 +2,13 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"newsletterProject/pkg/id"
 	dbmodel "newsletterProject/repository/sql/model"
+	"newsletterProject/repository/sql/mutation"
 	"newsletterProject/repository/sql/query"
 	"newsletterProject/service/model"
 )
@@ -54,6 +56,22 @@ func (r *EditorRepository) ReadEditorByEmail(ctx context.Context, email string) 
 	); err != nil {
 		return nil, err
 	}
+	return &model.Editor{
+		ID:       editor.Id,
+		Email:    editor.Email,
+		Password: editor.Password,
+	}, nil
+}
+func (r *EditorRepository) CreateEditor(ctx context.Context, email, password string) (*model.Editor, error) {
+	var editor dbmodel.Editor
+	err := r.pool.QueryRow(ctx, mutation.CreateEditor, pgx.NamedArgs{
+		"email":    email,
+		"password": password,
+	}).Scan(&editor.Id, &editor.Email, &editor.Password)
+	if err != nil {
+		return nil, errors.New("Error inserting editor to DB: " + err.Error())
+	}
+
 	return &model.Editor{
 		ID:       editor.Id,
 		Email:    editor.Email,

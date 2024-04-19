@@ -6,6 +6,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
 	"newsletterProject/mailer"
+	"newsletterProject/config"
+	"newsletterProject/pkg/authenticator"
 	"newsletterProject/repository"
 
 	"newsletterProject/service"
@@ -19,7 +21,7 @@ var version = "v0.0.0"
 
 func main() {
 	ctx := context.Background()
-	cfg := MustLoadConfig()
+	cfg := config.MustLoadConfig()
 	util.SetServerLogLevel(slog.LevelInfo)
 
 	database, err := setupDatabase(ctx, cfg)
@@ -64,7 +66,7 @@ func main() {
 	}
 }
 
-func setupDatabase(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
+func setupDatabase(ctx context.Context, cfg config.Config) (*pgxpool.Pool, error) {
 	// Initialize the database connection pool.
 	pool, err := pgxpool.New(
 		ctx,
@@ -77,7 +79,7 @@ func setupDatabase(ctx context.Context, cfg Config) (*pgxpool.Pool, error) {
 }
 
 func setupController(
-	_ Config,
+	cfg config.Config,
 	repository service.Repository,
 	mailer mailer.Mailer,
 ) (*api.Controller, error) {
@@ -87,8 +89,11 @@ func setupController(
 		return nil, fmt.Errorf("initializing editor service: %w", err)
 	}
 
+	authenticator := authenticator.NewJWTAuthenticator(cfg.SupabaseAuthSecret)
+
 	// Initialize the controller.
 	controller, err := api.NewController(
+		authenticator,
 		svc,
 		version,
 	)
