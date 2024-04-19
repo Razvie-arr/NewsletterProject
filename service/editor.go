@@ -21,3 +21,10 @@ func (s Service) GetEditorByEmail(ctx context.Context, email string) (*model.Edi
 	}
 	return editor, nil
 }
+func (s Service) CreateEditor(ctx context.Context, email, password string) (*model.Editor, error) {
+	editor, err := s.repository.CreateEditor(ctx, email, password)
+	if err != nil {
+		return nil, err
+	}
+	return editor, nil
+}
