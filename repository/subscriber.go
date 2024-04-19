@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"newsletterProject/pkg/id"
 	dbmodel "newsletterProject/repository/sql/model"
+	"newsletterProject/repository/sql/mutation"
 	"newsletterProject/repository/sql/query"
 	"newsletterProject/service/model"
 	"newsletterProject/transport/util"
@@ -46,26 +47,15 @@ func (r *SubscriberRepository) ReadSubscriberByEmail(ctx context.Context, email 
 func (r *SubscriberRepository) CreateSubscriber(ctx context.Context, email string) (*model.Subscriber, error) {
 	var subscriber dbmodel.Subscriber
 
-	if _, err := r.pool.Exec(
+	err := r.pool.QueryRow(
 		ctx,
-		query.CreateSubscriber,
+		mutation.CreateSubscriber,
 		pgx.NamedArgs{
 			"email": email,
 		},
-	); err != nil {
-		return nil, err
-	}
+	).Scan(&subscriber.Id, &subscriber.Email)
 
-	// Get the created subscriber
-	if err := pgxscan.Get(
-		ctx,
-		r.pool,
-		&subscriber,
-		query.ReadSubscriberByEmail,
-		pgx.NamedArgs{
-			"email": email,
-		},
-	); err != nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -82,7 +72,7 @@ func (r *SubscriberRepository) Subscribe(ctx context.Context, newsletterId id.ID
 	// Insert the subscription
 	_, err := r.pool.Exec(
 		ctx,
-		query.Subscribe,
+		mutation.Subscribe,
 		pgx.NamedArgs{
 			"newsletter_id":       newsletterId.String(),
 			"subscriber_id":       subscriberId.String(),
@@ -118,7 +108,7 @@ func (r *SubscriberRepository) GetVerificationString(ctx context.Context, newsle
 func (r *SubscriberRepository) Unsubscribe(ctx context.Context, newsletterId id.ID, subscriberId id.ID) error {
 	_, err := r.pool.Exec(
 		ctx,
-		query.Unsubscribe,
+		mutation.Unsubscribe,
 		pgx.NamedArgs{
 			"newsletter_id": newsletterId.String(),
 			"subscriber_id": subscriberId.String(),

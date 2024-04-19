@@ -50,14 +50,19 @@
     <div class="message">
         <p>Dear Subscriber,</p>
         <p>A new post has been added to the {{.NewsletterName}} newsletter.</p>
-        <p><strong>{{.NewsletterDescription}}</strong></p>
+        {{if .NewsletterDescription}}
+        <h5>
+            Description of the newsletter:
+        </h5>
+        <p>{{.NewsletterDescription}}</p>
+        {{end}}
+        <hr>
         <p>This newsletter is curated by {{.EditorMail}}. Feel free to contact them if you have any questions or feedback.</p>
         <hr>
         <p>{{.PostContent}}</p>
     </div>
     <div class="footer">
-        <!--- TODO: change to not localhost (also won't work if port is different) --->
-        <p>If you wish to unsubscribe from this newsletter, please click <a href="http://localhost:8080/api/v1/newsletter/unsubscribe?newsletterId={{.NewsletterId}}&email={{.SubscriberEmail}}&verificationString={{.VerificationString}}">here</a>.</p>
+        <p>If you wish to unsubscribe from this newsletter, please click <a href="{{.UnsubscribeLink}}">here</a>.</p>
     </div>
 </div>
 </body>
