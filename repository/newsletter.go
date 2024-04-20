@@ -75,10 +75,15 @@ func (r *NewsletterRepository) ReadNewsletter(ctx context.Context, newsletterId 
 		})
 	}
 
+	var description *string
+	if newsletter.Description.Valid {
+		description = &newsletter.Description.String
+	}
+
 	return &model.Newsletter{
 		ID:          newsletter.Id,
 		Name:        newsletter.Name,
-		Description: &newsletter.Description,
+		Description: description,
 		Editor: model.Editor{
 			ID:       editor.Id,
 			Email:    editor.Email,

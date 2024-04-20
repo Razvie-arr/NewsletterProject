@@ -1,22 +1,18 @@
 package mailer
 
 type SuccessfulEmailHTMLParams struct {
-	NewsletterId          string
 	NewsletterName        string
 	NewsletterDescription string
 	EditorMail            string
-	SubscriberEmail       string
-	VerificationString    string
+	UnsubscribeLink       string
 }
 
 type NewPostEmailHTMLParams struct {
-	NewsletterId          string
 	NewsletterName        string
 	NewsletterDescription string
 	EditorMail            string
 	PostContent           string
-	SubscriberEmail       string
-	VerificationString    string
+	UnsubscribeLink       string
 }
 
 type UnsubscribePageHTMLParams struct {

@@ -36,7 +36,7 @@ func (h *Handler) Subscribe(w http.ResponseWriter, r *http.Request) {
 
 	newsletterUUID, err := uuid.Parse(newsletterId)
 	if err != nil {
-		util.WriteErrResponse(w, http.StatusBadRequest, err)
+		util.WriteErrResponse(w, http.StatusBadRequest, errors.New("newsletter not found"))
 		return
 	}
 
@@ -56,7 +56,8 @@ func (h *Handler) Subscribe(w http.ResponseWriter, r *http.Request) {
 	// Try to send confirmation email
 	to := []string{Subscriber.Email}
 	subject := subscriptionConfirmation
-	body, err := mailer.GetSuccessfulSubscriptionEmailBody(newsletter, Subscriber.Email, verificationString)
+	unsubLink := mailer.GetUnsubscribeLink(newsletterId, Subscriber.Email, verificationString)
+	body, err := mailer.GetSuccessfulSubscriptionEmailBody(newsletter, unsubLink)
 	if err != nil {
 		// Subscription was successful, but email was not sent
 		util.WriteResponse(w, http.StatusOK, subscriptionSuccessfulNoEmailSent)
@@ -100,7 +101,7 @@ func (h *Handler) Unsubscribe(w http.ResponseWriter, r *http.Request) {
 	// Check that newsletter exists
 	newsletterUUID, err := uuid.Parse(newsletterId)
 	if err != nil {
-		util.WriteErrResponse(w, http.StatusBadRequest, err)
+		util.WriteErrResponse(w, http.StatusBadRequest, errors.New("newsletter not found"))
 		return
 	}
 
@@ -130,6 +131,7 @@ func (h *Handler) Unsubscribe(w http.ResponseWriter, r *http.Request) {
 			}
 			// Verification string does not match
 			util.WriteErrResponse(w, http.StatusUnauthorized, errors.New("verification string does not match"))
+			return
 		}
 	}
 	// No subscription found
