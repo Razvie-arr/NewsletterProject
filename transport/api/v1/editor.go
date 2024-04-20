@@ -2,9 +2,7 @@ package v1
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/jackc/pgx/v5"
 	"net/http"
 	apiEditor "newsletterProject/transport/api/v1/model"
 	"newsletterProject/transport/util"
@@ -19,24 +17,16 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	editor, err := h.service.GetEditorByEmail(r.Context(), transportEditor.Email)
-	if err == nil {
-		// testing
-		if editor.Password == transportEditor.Password {
-			util.WriteResponse(w, http.StatusOK, "Correct password")
-		} else {
-			util.WriteResponse(w, http.StatusUnauthorized, "Incorrect password")
-		}
+	if err != nil {
+		util.WriteResponse(w, http.StatusNotFound, "Editor not found")
 		return
 	}
 
-	if !errors.Is(err, pgx.ErrNoRows) {
-		util.WriteResponse(w, http.StatusInternalServerError, "Error reading DB: "+err.Error())
-		return
-	}
-
-	if _, err := h.service.CreateEditor(r.Context(), transportEditor.Email, transportEditor.Password); err != nil {
-		util.WriteResponse(w, http.StatusInternalServerError, "Error occurred while inserting to DB: "+err.Error())
-		return
+	// testing
+	if editor.Password == transportEditor.Password {
+		util.WriteResponse(w, http.StatusOK, "Correct password")
+	} else {
+		util.WriteResponse(w, http.StatusForbidden, "Incorrect password")
 	}
 	return
 }
