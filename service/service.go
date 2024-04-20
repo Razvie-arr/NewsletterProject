@@ -20,6 +20,8 @@ type Repository interface {
 	Subscribe(ctx context.Context, newsletterId id.ID, subscriberId id.ID) (string, error)
 	GetVerificationString(ctx context.Context, newsletterId id.ID, subscriberId id.ID) (string, error)
 	Unsubscribe(ctx context.Context, newsletterId id.ID, subscriberId id.ID) error
+	// Post
+	CreatePost(ctx context.Context, content string, newsletterId id.ID) (*model.Post, error)
 }
 
 type Service struct {

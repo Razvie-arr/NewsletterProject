@@ -13,4 +13,6 @@ var (
 	Unsubscribe string
 	//go:embed scripts/subscriberNewsletter/Subscribe.sql
 	Subscribe string
+	//go:embed scripts/post/Create.sql
+	CreatePost string
 )

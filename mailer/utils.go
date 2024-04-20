@@ -69,7 +69,7 @@ func GetNewPostBody(newsletter *model.Newsletter, post *model.Post, unsubscribeL
 		NewsletterName:        newsletter.Name,
 		NewsletterDescription: description,
 		EditorMail:            newsletter.Editor.Email,
-		PostContent:           post.Text,
+		PostContent:           post.Content,
 		UnsubscribeLink:       unsubscribeLink,
 	}
 	templatePath := getTemplatePath(newPostTemplateName)
