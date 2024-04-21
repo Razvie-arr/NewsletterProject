@@ -21,7 +21,7 @@ func PostSupabaseOTPRequest(email string) (int, error) {
 		return 0, errors.New("Error marshalling JSON: " + err.Error())
 	}
 
-	request, err := http.NewRequest("POST", cfg.SupabaseURL, bytes.NewBuffer(jsonBytes))
+	request, err := http.NewRequest("POST", cfg.SupabaseURL+"/auth/v1/otp", bytes.NewBuffer(jsonBytes))
 	if err != nil {
 		return 0, errors.New("Error creating request: " + err.Error())
 	}
@@ -30,13 +30,19 @@ func PostSupabaseOTPRequest(email string) (int, error) {
 	request.Header.Set("apiKey", cfg.SupabaseAPIKey)
 
 	client := &http.Client{}
-	responsePayload, err := client.Do(request)
-	if responsePayload.StatusCode < 200 || responsePayload.StatusCode >= 300 {
-		body, readErr := io.ReadAll(responsePayload.Body)
+	response, err := client.Do(request)
+	if err != nil {
+		return 0, errors.New("HTTP request failed: " + err.Error())
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		// Read the response body only if the request was not successful
+		responseBody, readErr := io.ReadAll(response.Body)
 		if readErr != nil {
-			return responsePayload.StatusCode, errors.New("failed to post OTP request to supabase and failed to read the response body")
+			return response.StatusCode, errors.New("failed to read response body: " + readErr.Error())
 		}
-		return responsePayload.StatusCode, errors.New("failed to post OTP request to supabase: " + string(body))
+		return response.StatusCode, errors.New("failed to post OTP request to Supabase: " + string(responseBody))
 	}
 
 	return 0, nil
