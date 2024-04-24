@@ -37,9 +37,8 @@ func (r *EditorRepository) ReadEditor(ctx context.Context, editorId id.ID) (*mod
 		return nil, err
 	}
 	return &model.Editor{
-		ID:       editor.Id,
-		Email:    editor.Email,
-		Password: editor.Password,
+		ID:    editor.Id,
+		Email: editor.Email,
 	}, nil
 }
 
@@ -57,24 +56,22 @@ func (r *EditorRepository) ReadEditorByEmail(ctx context.Context, email string) 
 		return nil, err
 	}
 	return &model.Editor{
-		ID:       editor.Id,
-		Email:    editor.Email,
-		Password: editor.Password,
+		ID:    editor.Id,
+		Email: editor.Email,
 	}, nil
 }
-func (r *EditorRepository) CreateEditor(ctx context.Context, email, password string) (*model.Editor, error) {
+func (r *EditorRepository) CreateEditor(ctx context.Context, uuid, email string) (*model.Editor, error) {
 	var editor dbmodel.Editor
 	err := r.pool.QueryRow(ctx, mutation.CreateEditor, pgx.NamedArgs{
-		"email":    email,
-		"password": password,
-	}).Scan(&editor.Id, &editor.Email, &editor.Password)
+		"uuid":  uuid,
+		"email": email,
+	}).Scan(&editor.Id, &editor.Email)
 	if err != nil {
 		return nil, errors.New("Error inserting editor to DB: " + err.Error())
 	}
 
 	return &model.Editor{
-		ID:       editor.Id,
-		Email:    editor.Email,
-		Password: editor.Password,
+		ID:    editor.Id,
+		Email: editor.Email,
 	}, nil
 }

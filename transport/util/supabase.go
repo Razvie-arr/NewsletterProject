@@ -45,5 +45,5 @@ func PostSupabaseOTPRequest(email string) (int, error) {
 		return response.StatusCode, errors.New("failed to post OTP request to Supabase: " + string(responseBody))
 	}
 
-	return 0, nil
+	return 200, nil
 }

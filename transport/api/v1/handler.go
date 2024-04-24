@@ -31,6 +31,7 @@ func (h *Handler) initRouter() {
 
 	r.Route("/editor", func(r chi.Router) {
 		r.Post("/register", h.Register)
+		r.Get("/verify", h.Verify)
 		r.Post("/login", h.Login)
 	})
 
