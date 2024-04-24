@@ -1,7 +1,6 @@
 SELECT
 	e.id,
-	e.email,
-	e.password
+	e.email
 FROM
 	editor as e
 WHERE

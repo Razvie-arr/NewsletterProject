@@ -48,5 +48,8 @@ func (h *Handler) initRouter() {
 		r.Get("/unsubscribe", h.UnsubscribePage)
 	})
 
+	r.Route("/post", func(r chi.Router) {
+		r.With(authenticate).Post("/", h.PublishPost)
+	})
 	h.Mux = r
 }

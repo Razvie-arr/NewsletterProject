@@ -39,7 +39,7 @@ func (h *Handler) PublishPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if current editor is newsletter's owner
-	if newsletterSvc.Editor.ID.String() != r.Context().Value("user_id") {
+	if newsletterSvc.Editor.ID.String() != r.Context().Value("editor_id") {
 		util.WriteErrResponse(w, http.StatusForbidden, errors.ErrEditorIsNotOwner)
 		return
 	}

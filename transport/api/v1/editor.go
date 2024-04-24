@@ -24,6 +24,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&transportEditor)
 	if err != nil {
 		util.WriteResponse(w, http.StatusBadRequest, "Corrupted data")
+		return
 	}
 
 	editor, err := h.service.GetEditorByEmail(r.Context(), transportEditor.Email)
