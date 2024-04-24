@@ -85,9 +85,8 @@ func (r *NewsletterRepository) ReadNewsletter(ctx context.Context, newsletterId 
 		Name:        newsletter.Name,
 		Description: description,
 		Editor: model.Editor{
-			ID:       editor.Id,
-			Email:    editor.Email,
-			Password: editor.Password,
+			ID:    editor.Id,
+			Email: editor.Email,
 		},
 		Subscriber: svcSubscribers,
 	}, nil
