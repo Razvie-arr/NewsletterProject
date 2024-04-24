@@ -16,7 +16,7 @@ import (
 
 type verifyData struct {
 	Email string `validate:"required,email"`
-	Uuid  id.ID  `validate:"required,uuid"`
+	Uuid  id.ID  `validate:"required"`
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
