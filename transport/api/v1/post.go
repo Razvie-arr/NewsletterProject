@@ -10,9 +10,13 @@ import (
 	"newsletterProject/service/errors"
 	"newsletterProject/transport/api/v1/model"
 	"newsletterProject/transport/util"
+	"strings"
 )
 
-const createdSuccessfullyButNoEmailSent = "Post created successfully, but email was not sent"
+const (
+	createdSuccessfullyButNoEmailSent = "Post created successfully, but email was not sent to all users, not sent users: "
+	createdSentSuccessfully           = "Post sent successfully"
+)
 
 func (h *Handler) PublishPost(w http.ResponseWriter, r *http.Request) {
 	var apiPost model.Post
@@ -51,20 +55,27 @@ func (h *Handler) PublishPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// send post via email to all subscribers
-	var subscribersEmails = make([]string, len(newsletterSvc.Subscribers))
-	for _, subscriber := range newsletterSvc.Subscribers {
-		subscribersEmails = append(subscribersEmails, subscriber.Email)
-	}
 	subject := "New post in " + newsletterSvc.Name
-	body, err := mailer.GetNewPostBody(newsletterSvc, post, "asd")
-	if err != nil {
-		// Post created successfully, but email was not sent
-		util.WriteResponse(w, http.StatusOK, createdSuccessfullyButNoEmailSent)
-		return
-	}
-	if err = h.service.SendEmail(subscribersEmails, subject, body); err != nil {
-		util.WriteResponse(w, http.StatusOK, createdSuccessfullyButNoEmailSent)
-		return
+	var notSentUsers []string
+	for _, subscriber := range newsletterSvc.Subscribers {
+		email := subscriber.Email
+		//TODO: put verification string to unsubscribe link
+		unsubscribeLink := mailer.GetUnsubscribeLink(newsletterUUID.String(), email, "")
+		body, err := mailer.GetNewPostBody(newsletterSvc, post, unsubscribeLink)
+		if err != nil {
+			notSentUsers = append(notSentUsers, email)
+			return
+		}
+		to := []string{subscriber.Email}
+		if err = h.service.SendEmail(to, subject, body); err != nil {
+			notSentUsers = append(notSentUsers, email)
+		}
 	}
 
+	if len(notSentUsers) != 0 {
+		notSentUsersString := strings.Join(notSentUsers, ", ")
+		util.WriteResponse(w, http.StatusInternalServerError, createdSuccessfullyButNoEmailSent+notSentUsersString)
+		return
+	}
+	util.WriteResponse(w, http.StatusOK, createdSentSuccessfully)
 }

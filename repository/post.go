@@ -28,8 +28,8 @@ func (r *PostRepository) CreatePost(ctx context.Context, content string, newslet
 		mutation.CreatePost,
 		pgx.NamedArgs{
 			"content":       content,
-			"newsletter_id": newsletterId,
-		}).Scan(&post); err != nil {
+			"newsletter_id": newsletterId.String(),
+		}).Scan(&post.Id, &post.Content, &post.NewsletterId); err != nil {
 		return nil, err
 	}
 
