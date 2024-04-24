@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"net/http"
 	"net/url"
+	"newsletterProject/pkg/id"
 	apiEditor "newsletterProject/transport/api/v1/model"
 	"newsletterProject/transport/util"
 	"strings"
@@ -14,7 +16,7 @@ import (
 
 type verifyData struct {
 	Email string `validate:"required,email"`
-	Uuid  string `validate:"required,uuid"`
+	Uuid  id.ID  `validate:"required,uuid"`
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -112,7 +114,11 @@ func parseData(data string) (*verifyData, error) {
 			case "email":
 				params.Email = value
 			case "sub":
-				params.Uuid = value
+				userId, err := uuid.Parse(value)
+				if err != nil {
+					return nil, errors.New("failed to parse uuid: " + value)
+				}
+				params.Uuid = id.ID(userId)
 			}
 		}
 	}

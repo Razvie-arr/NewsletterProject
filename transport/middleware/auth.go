@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -40,7 +41,9 @@ func NewAuthenticate(authenticator Authenticator) func(next http.Handler) http.H
 				return
 			}
 
-			next.ServeHTTP(responseWriter, request)
+			ctx := context.WithValue(request.Context(), "uuid", claims["uuid"])
+
+			next.ServeHTTP(responseWriter, request.WithContext(ctx))
 		})
 	}
 }

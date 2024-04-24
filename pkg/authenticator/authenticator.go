@@ -23,6 +23,7 @@ func (authenticator JWTAuthenticator) VerifyToken(token string) (map[string]inte
 
 	result := map[string]interface{}{
 		"role": claims.Role,
+		"uuid": claims.Uuid,
 	}
 	return result, nil
 }
@@ -30,5 +31,6 @@ func (authenticator JWTAuthenticator) VerifyToken(token string) (map[string]inte
 type jwtClaims struct {
 	jwt.RegisteredClaims
 
+	Uuid string `json:"sub"`
 	Role string `json:"role"`
 }

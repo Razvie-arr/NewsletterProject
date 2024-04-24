@@ -60,7 +60,7 @@ func (r *EditorRepository) ReadEditorByEmail(ctx context.Context, email string) 
 		Email: editor.Email,
 	}, nil
 }
-func (r *EditorRepository) CreateEditor(ctx context.Context, uuid, email string) (*model.Editor, error) {
+func (r *EditorRepository) CreateEditor(ctx context.Context, uuid id.ID, email string) (*model.Editor, error) {
 	var editor dbmodel.Editor
 	err := r.pool.QueryRow(ctx, mutation.CreateEditor, pgx.NamedArgs{
 		"uuid":  uuid,
