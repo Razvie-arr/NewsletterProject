@@ -15,4 +15,5 @@ type Service interface {
 	GetNewsletterById(ctx context.Context, newsletterId id.ID) (*svcmodel.Newsletter, error)
 	GetVerificationString(ctx context.Context, newsletterId id.ID, subscriberId id.ID) (string, error)
 	Unsubscribe(ctx context.Context, newsletterId id.ID, subscriberId id.ID) error
+	PublishPost(ctx context.Context, content string, newsletterId id.ID) (*svcmodel.Post, error)
 }

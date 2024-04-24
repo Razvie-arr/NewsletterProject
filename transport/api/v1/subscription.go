@@ -112,7 +112,7 @@ func (h *Handler) Unsubscribe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if subscriber is subscribed to the newsletter
-	for _, subscriber := range newsletter.Subscriber {
+	for _, subscriber := range newsletter.Subscribers {
 		if subscriber.Email == body.Email {
 			// Verify string
 			dbVerificationString, err := h.service.GetVerificationString(r.Context(), id.ID(newsletterUUID), subscriber.ID)
