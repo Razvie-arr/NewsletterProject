@@ -9,3 +9,9 @@ type Newsletter struct {
 	Editor      Editor
 	Subscribers []Subscriber
 }
+
+type BaseNewsletter struct {
+	ID          id.ID
+	Name        string
+	Description *string
+}

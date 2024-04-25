@@ -35,16 +35,13 @@ func (h *Handler) initRouter() {
 		r.Post("/login", h.Login)
 	})
 
-	r.Route("/test", func(r chi.Router) {
-		r.With(authenticate).Get("/", h.Test)
-	})
-
 	r.Route("/subscription", func(r chi.Router) {
 		r.Post("/{newsletterId}", h.Subscribe)
 		r.Delete("/{newsletterId}", h.Unsubscribe)
 	})
 
 	r.Route("/newsletter", func(r chi.Router) {
+		r.With(authenticate).Post("/", h.CreateNewsletter)
 		r.Get("/unsubscribe", h.UnsubscribePage)
 	})
 

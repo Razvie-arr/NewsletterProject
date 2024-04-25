@@ -14,3 +14,11 @@ func (s Service) GetNewsletterById(ctx context.Context, newsletterId id.ID) (*sv
 	}
 	return newsletter, nil
 }
+
+func (s Service) CreateNewsletter(ctx context.Context, name, description string, editorId id.ID) (*svcmodel.BaseNewsletter, error) {
+	svcNewsletter, err := s.repository.CreateNewsletter(ctx, name, description, editorId)
+	if err != nil {
+		return nil, err
+	}
+	return svcNewsletter, nil
+}

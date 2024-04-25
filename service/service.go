@@ -20,6 +20,7 @@ type Repository interface {
 	Subscribe(ctx context.Context, newsletterId id.ID, subscriberId id.ID) (string, error)
 	GetVerificationString(ctx context.Context, newsletterId id.ID, subscriberId id.ID) (string, error)
 	Unsubscribe(ctx context.Context, newsletterId id.ID, subscriberId id.ID) error
+	CreateNewsletter(ctx context.Context, name, description string, editorId id.ID) (*model.BaseNewsletter, error)
 	// Post
 	CreatePost(ctx context.Context, content string, newsletterId id.ID) (*model.Post, error)
 }
