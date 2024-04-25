@@ -8,6 +8,7 @@ import (
 	"newsletterProject/mailer"
 	"newsletterProject/pkg/id"
 	"newsletterProject/service/errors"
+	svcmodel "newsletterProject/service/model"
 	"newsletterProject/transport/api/v1/model"
 	"newsletterProject/transport/util"
 	"strings"
@@ -57,22 +58,38 @@ func (h *Handler) PublishPost(w http.ResponseWriter, r *http.Request) {
 	// send post via email to all subscribers
 	subject := "New post in " + newsletterSvc.Name
 	var notSentUsers []string
-	for _, subscriber := range newsletterSvc.Subscribers {
-		email := subscriber.Email
-		verificationString, err := h.service.GetVerificationString(r.Context(), newsletterSvc.ID, subscriber.ID)
-		if err != nil {
-			notSentUsers = append(notSentUsers, email)
-			return
-		}
 
-		unsubscribeLink := mailer.GetUnsubscribeLink(newsletterUUID.String(), email, verificationString)
-		body, err := mailer.GetNewPostBody(newsletterSvc, post, unsubscribeLink)
-		if err != nil {
-			notSentUsers = append(notSentUsers, email)
-			return
-		}
-		to := []string{subscriber.Email}
-		if err = h.service.SendEmail(to, subject, body); err != nil {
+	// Create a channel to collect errors from goroutines
+	errCh := make(chan string, len(newsletterSvc.Subscribers))
+
+	for _, subscriber := range newsletterSvc.Subscribers {
+		go func(subscriber svcmodel.Subscriber) {
+			email := subscriber.Email
+			verificationString, err := h.service.GetVerificationString(r.Context(), newsletterSvc.ID, subscriber.ID)
+			if err != nil {
+				errCh <- email
+				return
+			}
+
+			unsubscribeLink := mailer.GetUnsubscribeLink(newsletterUUID.String(), email, verificationString)
+			body, err := mailer.GetNewPostBody(newsletterSvc, post, unsubscribeLink)
+			if err != nil {
+				errCh <- email
+				return
+			}
+			to := []string{subscriber.Email}
+			if err = h.service.SendEmail(to, subject, body); err != nil {
+				errCh <- email
+			} else {
+				errCh <- "" // Send an empty string to the channel if there's no error
+			}
+		}(subscriber)
+	}
+
+	// Collect errors from the error channel
+	for range newsletterSvc.Subscribers {
+		email := <-errCh
+		if email != "" {
 			notSentUsers = append(notSentUsers, email)
 		}
 	}
