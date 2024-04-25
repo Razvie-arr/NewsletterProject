@@ -88,7 +88,7 @@ func (r *NewsletterRepository) ReadNewsletter(ctx context.Context, newsletterId 
 			ID:    editor.Id,
 			Email: editor.Email,
 		},
-		Subscriber: svcSubscribers,
+		Subscribers: svcSubscribers,
 	}, nil
 
 }

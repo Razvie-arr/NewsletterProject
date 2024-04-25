@@ -16,7 +16,7 @@ import (
 
 type verifyData struct {
 	Email string `validate:"required,email"`
-	Uuid  id.ID  `validate:"required,uuid"`
+	Uuid  id.ID  `validate:"required"`
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -24,6 +24,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&transportEditor)
 	if err != nil {
 		util.WriteResponse(w, http.StatusBadRequest, "Corrupted data")
+		return
 	}
 
 	editor, err := h.service.GetEditorByEmail(r.Context(), transportEditor.Email)

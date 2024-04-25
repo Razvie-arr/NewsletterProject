@@ -11,7 +11,7 @@ type Repository interface {
 	// Editor
 	ReadEditor(ctx context.Context, editorId id.ID) (*model.Editor, error)
 	ReadEditorByEmail(ctx context.Context, email string) (*model.Editor, error)
-	CreateEditor(ctx context.Context, uuid id.ID, email string) (*model.Editor, error)
+	CreateEditor(ctx context.Context, id id.ID, email string) (*model.Editor, error)
 	// Subscriber
 	ReadSubscriberByEmail(ctx context.Context, email string) (*model.Subscriber, error)
 	CreateSubscriber(ctx context.Context, email string) (*model.Subscriber, error)
@@ -20,6 +20,8 @@ type Repository interface {
 	Subscribe(ctx context.Context, newsletterId id.ID, subscriberId id.ID) (string, error)
 	GetVerificationString(ctx context.Context, newsletterId id.ID, subscriberId id.ID) (string, error)
 	Unsubscribe(ctx context.Context, newsletterId id.ID, subscriberId id.ID) error
+	// Post
+	CreatePost(ctx context.Context, content string, newsletterId id.ID) (*model.Post, error)
 }
 
 type Service struct {

@@ -26,7 +26,7 @@ func (s Service) Subscribe(ctx context.Context, newsletterId id.ID, subscriberMa
 	}
 
 	// Check if the subscriber is already subscribed to the newsletter
-	for _, sub := range newsletter.Subscriber {
+	for _, sub := range newsletter.Subscribers {
 		if sub.ID == subscriber.ID {
 			return nil, "", errors.ErrAlreadySubscribed
 		}

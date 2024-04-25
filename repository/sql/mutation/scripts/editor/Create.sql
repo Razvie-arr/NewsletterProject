@@ -1,2 +1,6 @@
-INSERT INTO editor (id, email)
-VALUES (@uuid, @email);
+INSERT INTO editor
+    (id, email)
+VALUES
+    (@id, @email)
+RETURNING
+    id, email

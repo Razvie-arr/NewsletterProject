@@ -41,7 +41,7 @@ func NewAuthenticate(authenticator Authenticator) func(next http.Handler) http.H
 				return
 			}
 
-			ctx := context.WithValue(request.Context(), "uuid", claims["uuid"])
+			ctx := context.WithValue(request.Context(), "editor_id", claims["uuid"])
 
 			next.ServeHTTP(responseWriter, request.WithContext(ctx))
 		})

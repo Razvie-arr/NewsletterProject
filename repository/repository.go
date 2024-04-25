@@ -6,12 +6,15 @@ type Repository struct {
 	*EditorRepository
 	*SubscriberRepository
 	*NewsletterRepository
+	*PostRepository
 }
 
 func New(pool *pgxpool.Pool) (*Repository, error) {
+	newsletterRepository := NewNewsletterRepository(pool)
 	return &Repository{
 		EditorRepository:     NewEditorRepository(pool),
 		SubscriberRepository: NewSubscriberRepository(pool),
-		NewsletterRepository: NewNewsletterRepository(pool),
+		NewsletterRepository: newsletterRepository,
+		PostRepository:       NewPostRepository(pool, newsletterRepository),
 	}, nil
 }

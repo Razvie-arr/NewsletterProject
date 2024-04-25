@@ -7,5 +7,5 @@ type Newsletter struct {
 	Name        string
 	Description *string
 	Editor      Editor
-	Subscriber  []Subscriber
+	Subscribers []Subscriber
 }
