@@ -48,12 +48,12 @@ func main() {
 	serverConfig := httpx.ServerConfig{
 		Addr:    addr,
 		Handler: controller,
-		Hooks:   httpx.ServerHooks{
-			// BeforeShutdown: []httpx.ServerHookFunc{
-			// 	func(_ context.Context) {
-			// 		database.Close()
-			// 	},
-			// },
+		Hooks: httpx.ServerHooks{
+			BeforeShutdown: []httpx.ServerHookFunc{
+				func(_ context.Context) {
+					database.Close()
+				},
+			},
 		},
 		Limits: nil,
 		Logger: util.NewServerLogger("httpx.Server"),

@@ -23,7 +23,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var transportEditor apiEditor.Editor
 	err := json.NewDecoder(r.Body).Decode(&transportEditor)
 	if err != nil {
-		util.WriteResponse(w, http.StatusBadRequest, "Corrupted data")
+		util.WriteResponse(w, http.StatusBadRequest, "Error reading request body")
 		return
 	}
 
@@ -42,6 +42,12 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	var payload apiEditor.SupabasePayload
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
+		util.WriteResponse(w, http.StatusBadRequest, "Error reading request body")
+		return
+	}
+
+	// Validate the payload
+	if validator.New().Struct(&payload) != nil {
 		util.WriteResponse(w, http.StatusBadRequest, "Error reading request body")
 		return
 	}
@@ -131,9 +137,4 @@ func parseData(data string) (*verifyData, error) {
 	}
 
 	return &params, nil
-}
-
-func (h *Handler) Test(w http.ResponseWriter, _ *http.Request) {
-	util.WriteResponse(w, http.StatusAccepted, "This seems to work...")
-	return
 }

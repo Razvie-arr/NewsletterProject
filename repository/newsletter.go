@@ -2,11 +2,13 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"newsletterProject/pkg/id"
 	dbmodel "newsletterProject/repository/sql/model"
+	"newsletterProject/repository/sql/mutation"
 	"newsletterProject/repository/sql/query"
 	"newsletterProject/service/model"
 )
@@ -91,4 +93,38 @@ func (r *NewsletterRepository) ReadNewsletter(ctx context.Context, newsletterId 
 		Subscribers: svcSubscribers,
 	}, nil
 
+}
+
+func (r *NewsletterRepository) CreateNewsletter(ctx context.Context, name, description string, editorId id.ID) (*model.BaseNewsletter, error) {
+	var newsletter dbmodel.Newsletter
+
+	namedArgs := pgx.NamedArgs{
+		"name":      name,
+		"editor_id": editorId,
+	}
+
+	if description != "" {
+		namedArgs["description"] = description
+	} else {
+		namedArgs["description"] = nil
+	}
+
+	if err := r.pool.QueryRow(
+		ctx,
+		mutation.CreateNewsletter,
+		namedArgs,
+	).Scan(&newsletter.Id, &newsletter.Name, &newsletter.Description); err != nil {
+		return nil, errors.New("Error inserting editor to DB: " + err.Error())
+	}
+
+	var nullableDescription *string
+	if newsletter.Description.Valid {
+		nullableDescription = &newsletter.Description.String
+	}
+
+	return &model.BaseNewsletter{
+		ID:          newsletter.Id,
+		Name:        newsletter.Name,
+		Description: nullableDescription,
+	}, nil
 }

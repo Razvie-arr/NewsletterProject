@@ -45,10 +45,6 @@ func (c *Controller) initRouter() {
 	r := chi.NewRouter()
 
 	r.Group(func(r chi.Router) {
-		// r.Use(httpx.LoggingMiddleware(util.NewServerLogger("httpx.LoggingMiddleware")))
-		// r.Use(httpx.RecoverMiddleware(util.NewServerLogger("httpx.RecoverMiddleware").WithStackTrace(slog.Level)))
-		// TODO: Add authentication middleware
-		// authenticate := middleware.Authenticate(c.logger, c.tokenParser)
 
 		v1Handler := apiv1.NewHandler(
 			c.authenticator,
@@ -70,7 +66,6 @@ func (c *Controller) initRouter() {
 	c.Mux = r
 }
 
-// TODO: Improve this handler.
 func (c *Controller) OpenAPI(w http.ResponseWriter, _ *http.Request) {
 	encodeFunc := func(w http.ResponseWriter, data any) error {
 		d, ok := data.([]byte)
@@ -93,7 +88,6 @@ func (c *Controller) OpenAPI(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-// TODO: Improve this handler.
 func (c *Controller) Version(w http.ResponseWriter, _ *http.Request) {
 	if err := httpx.WriteResponse(
 		w,

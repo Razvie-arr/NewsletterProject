@@ -59,8 +59,13 @@ func (h *Handler) PublishPost(w http.ResponseWriter, r *http.Request) {
 	var notSentUsers []string
 	for _, subscriber := range newsletterSvc.Subscribers {
 		email := subscriber.Email
-		//TODO: put verification string to unsubscribe link
-		unsubscribeLink := mailer.GetUnsubscribeLink(newsletterUUID.String(), email, "")
+		verificationString, err := h.service.GetVerificationString(r.Context(), newsletterSvc.ID, subscriber.ID)
+		if err != nil {
+			notSentUsers = append(notSentUsers, email)
+			return
+		}
+
+		unsubscribeLink := mailer.GetUnsubscribeLink(newsletterUUID.String(), email, verificationString)
 		body, err := mailer.GetNewPostBody(newsletterSvc, post, unsubscribeLink)
 		if err != nil {
 			notSentUsers = append(notSentUsers, email)
