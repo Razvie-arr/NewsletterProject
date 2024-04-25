@@ -172,6 +172,11 @@ func requestSessionRefresh(w http.ResponseWriter, token string) {
 		return
 	}
 
+	if err := validator.New().Struct(response); err != nil {
+		util.WriteResponse(w, http.StatusBadRequest, "Error validating response from supabase: "+err.Error())
+		return
+	}
+
 	util.WriteResponseWithJsonBody(w, http.StatusOK, response)
 
 	return
