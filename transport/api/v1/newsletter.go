@@ -54,13 +54,13 @@ func (h *Handler) CreateNewsletter(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) DeleteNewsletter(w http.ResponseWriter, r *http.Request) {
 	idUUID, err := uuid.Parse(chi.URLParam(r, "newsletterId"))
-	editorId := r.Context().Value("editor_id")
-	editorIdUUID, err := uuid.Parse(editorId.(string))
 	// validation of newsletter ID
 	if err != nil {
 		util.WriteErrResponse(w, http.StatusBadRequest, errors.New("invalid newsletter ID"))
 		return
 	}
+	editorId := r.Context().Value("editor_id")
+	editorIdUUID, err := uuid.Parse(editorId.(string))
 	// validation of editor ID
 	if err != nil {
 		util.WriteErrResponse(w, http.StatusBadRequest, errors.New("invalid credentials"))
