@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -115,6 +116,106 @@ func (r *NewsletterRepository) CreateNewsletter(ctx context.Context, name, descr
 		namedArgs,
 	).Scan(&newsletter.Id, &newsletter.Name, &newsletter.Description); err != nil {
 		return nil, errors.New("Error inserting editor to DB: " + err.Error())
+	}
+
+	var nullableDescription *string
+	if newsletter.Description.Valid {
+		nullableDescription = &newsletter.Description.String
+	}
+
+	return &model.BaseNewsletter{
+		ID:          newsletter.Id,
+		Name:        newsletter.Name,
+		Description: nullableDescription,
+	}, nil
+}
+
+func (r *NewsletterRepository) ExistsNewsletterWithEditor(ctx context.Context, newsletterId id.ID, editorId id.ID) error {
+	var exists bool
+
+	if err := r.pool.QueryRow(
+		ctx,
+		query.ExistsNewsletterWithEditor,
+		pgx.NamedArgs{
+			"id":       newsletterId.String(),
+			"editorId": editorId.String(),
+		},
+	).Scan(&exists); err != nil {
+		return err
+	}
+
+	if !exists {
+		return fmt.Errorf("no newsletter found with the specified editor and newsletter ID")
+	}
+
+	return nil
+}
+
+func (r *NewsletterRepository) DeleteNewsletter(ctx context.Context, newsletterId id.ID) error {
+	// pouze mažeme, protože již máme ověřené, že newsletter existuje a patří danému editorovi
+	_, err := r.pool.Exec(
+		ctx,
+		mutation.DeleteNewsletter,
+		pgx.NamedArgs{
+			"id": newsletterId.String(),
+		},
+	)
+	return err
+}
+
+func (r *NewsletterRepository) GetNewslettersInfo(ctx context.Context, lim int) ([]*model.NewsletterInfo, error) {
+	var dbNewsletters []*dbmodel.NewsletterInfo
+	err := pgxscan.Select(
+		ctx,
+		r.pool,
+		&dbNewsletters,
+		query.ReadNewsletterInfoWithLimit,
+		lim,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query newsletters: %w", err)
+	}
+
+	// Překlad db modelů na servisní modely
+	var svcNewsletters []*model.NewsletterInfo
+	for _, dbNl := range dbNewsletters {
+		var description *string // Inicializujte pointer na string
+		if dbNl.Description.Valid {
+			description = &dbNl.Description.String // Přiřaďte adresu, pokud je hodnota Valid
+		}
+
+		svcNl := &model.NewsletterInfo{
+			Id:          dbNl.Id,
+			Name:        dbNl.Name,
+			Description: description, // Použijte pointer na string
+			EditorId:    dbNl.EditorId,
+			EditorEmail: dbNl.EditorEmail,
+		}
+		svcNewsletters = append(svcNewsletters, svcNl)
+	}
+
+	return svcNewsletters, nil
+}
+
+func (r *NewsletterRepository) UpdateNewsletter(ctx context.Context, newsletterId id.ID, name string, description string) (*model.BaseNewsletter, error) {
+	var newsletter dbmodel.Newsletter
+
+	namedArgs := pgx.NamedArgs{
+		"id":   newsletterId,
+		"name": name,
+	}
+
+	if description != "" {
+		namedArgs["description"] = description
+	} else {
+		namedArgs["description"] = nil
+	}
+	if err := r.pool.QueryRow(
+		ctx,
+		mutation.UpdateNewsletter,
+		namedArgs,
+	).Scan(&newsletter.Id, &newsletter.Name, &newsletter.Description); err != nil {
+		return nil, errors.New("error updating newsletter in DB: " + err.Error())
 	}
 
 	var nullableDescription *string

@@ -17,4 +17,8 @@ var (
 	ReadSubscribersByNewsletterId string
 	//go:embed scripts/subscriberNewsletter/GetVerificationString.sql
 	GetVerificationString string
+	//go:embed scripts/newsletter/ExistsNewsletterWithEditor.sql
+	ExistsNewsletterWithEditor string
+	//go:embed scripts/newsletter/ReadNewsletterInfoWithLimit.sql
+	ReadNewsletterInfoWithLimit string
 )
