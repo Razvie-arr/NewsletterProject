@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"newsletterProject/pkg/id"
-	apiEditor "newsletterProject/transport/api/v1/model"
+	transportModel "newsletterProject/transport/api/v1/model"
 	"newsletterProject/transport/util"
 	"strings"
 )
@@ -20,10 +20,10 @@ type verifyData struct {
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
-	var transportEditor apiEditor.Editor
+	var transportEditor transportModel.Editor
 	err := json.NewDecoder(r.Body).Decode(&transportEditor)
 	if err != nil {
-		util.WriteResponse(w, http.StatusBadRequest, "Error reading request body")
+		util.WriteResponse(w, http.StatusBadRequest, "Error reading request body: "+err.Error())
 		return
 	}
 
@@ -38,17 +38,18 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	util.WriteResponse(w, http.StatusOK, "login successful")
 	return
 }
+
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
-	var payload apiEditor.SupabasePayload
+	var payload transportModel.SupabaseOTPPayload
 	err := json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
-		util.WriteResponse(w, http.StatusBadRequest, "Error reading request body")
+		util.WriteResponse(w, http.StatusBadRequest, "Error reading request body: "+err.Error())
 		return
 	}
 
 	// Validate the payload
-	if validator.New().Struct(&payload) != nil {
-		util.WriteResponse(w, http.StatusBadRequest, "Error reading request body")
+	if err := validator.New().Struct(&payload); err != nil {
+		util.WriteResponse(w, http.StatusBadRequest, "Error validating request body: "+err.Error())
 		return
 	}
 
@@ -137,4 +138,46 @@ func parseData(data string) (*verifyData, error) {
 	}
 
 	return &params, nil
+}
+
+func (h *Handler) Refresh(w http.ResponseWriter, r *http.Request) {
+	var payload transportModel.SupabaseRefreshPayload
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		util.WriteResponse(w, http.StatusBadRequest, "Error reading request body: "+err.Error())
+		return
+	}
+
+	// Validate the payload
+	if err := validator.New().Struct(&payload); err != nil {
+		util.WriteResponse(w, http.StatusBadRequest, "Error validating request body: "+err.Error())
+		return
+	}
+
+	requestSessionRefresh(w, payload.RefreshToken)
+	return
+}
+
+func requestSessionRefresh(w http.ResponseWriter, token string) {
+	response, statusCode, err := util.PostSupabaseRefreshRequest(token)
+	if statusCode != 200 && err != nil {
+		util.WriteResponse(w, statusCode, "Error sending request to supabase: "+err.Error())
+		return
+	}
+	if err != nil {
+		util.WriteResponse(w, http.StatusInternalServerError, "Error sending request to supabase: "+err.Error())
+		return
+	}
+	if statusCode != 200 {
+		util.WriteResponse(w, http.StatusInternalServerError, fmt.Sprintf("Something unexpected happened: error is nil but statusCode is %d", statusCode))
+		return
+	}
+
+	if err := validator.New().Struct(response); err != nil {
+		util.WriteResponse(w, http.StatusBadRequest, "Error validating response from supabase: "+err.Error())
+		return
+	}
+
+	util.WriteResponseWithJsonBody(w, http.StatusOK, response)
+
+	return
 }

@@ -33,6 +33,7 @@ func (h *Handler) initRouter() {
 		r.Post("/register", h.Register)
 		r.Get("/verify", h.Verify)
 		r.Post("/login", h.Login)
+		r.With(authenticate).Post("/refresh", h.Refresh)
 	})
 
 	r.Route("/subscription", func(r chi.Router) {
