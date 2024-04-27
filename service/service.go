@@ -7,6 +7,7 @@ import (
 	"newsletterProject/service/model"
 )
 
+// definice repository
 type Repository interface {
 	// Editor
 	ReadEditor(ctx context.Context, editorId id.ID) (*model.Editor, error)
@@ -21,6 +22,10 @@ type Repository interface {
 	GetVerificationString(ctx context.Context, newsletterId id.ID, subscriberId id.ID) (string, error)
 	Unsubscribe(ctx context.Context, newsletterId id.ID, subscriberId id.ID) error
 	CreateNewsletter(ctx context.Context, name, description string, editorId id.ID) (*model.BaseNewsletter, error)
+	ExistsNewsletterWithEditor(ctx context.Context, newsletterId id.ID, editorId id.ID) error
+	DeleteNewsletter(ctx context.Context, newsletterId id.ID) error
+	GetNewslettersInfo(ctx context.Context, lim int) ([]*model.NewsletterInfo, error)
+	UpdateNewsletter(ctx context.Context, newsletterId id.ID, name, description string) (*model.BaseNewsletter, error)
 	// Post
 	CreatePost(ctx context.Context, content string, newsletterId id.ID) (*model.Post, error)
 }

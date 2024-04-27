@@ -42,6 +42,10 @@ func (h *Handler) initRouter() {
 
 	r.Route("/newsletter", func(r chi.Router) {
 		r.With(authenticate).Post("/", h.CreateNewsletter)
+		r.With(authenticate).Delete("/{newsletterId}", h.DeleteNewsletter)
+		r.With(authenticate).Patch("/", h.UpdateNewsletter)
+		r.Get("/{newsletterId}", h.GetNewsletterById)
+		r.Get("/", h.GetNewsletters)
 		r.Get("/unsubscribe", h.UnsubscribePage)
 	})
 

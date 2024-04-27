@@ -15,3 +15,11 @@ type BaseNewsletter struct {
 	Name        string
 	Description *string
 }
+
+type NewsletterInfo struct {
+	Id          id.ID
+	Name        string
+	Description *string
+	EditorId    id.ID
+	EditorEmail string
+}

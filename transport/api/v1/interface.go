@@ -17,4 +17,8 @@ type Service interface {
 	Unsubscribe(ctx context.Context, newsletterId id.ID, subscriberId id.ID) error
 	PublishPost(ctx context.Context, content string, newsletterId id.ID) (*svcmodel.Post, error)
 	CreateNewsletter(ctx context.Context, name, description string, editorId id.ID) (*svcmodel.BaseNewsletter, error)
+	ExistsNewsletterOwnedByEditor(ctx context.Context, newsletterId id.ID, editorId id.ID) error
+	DeleteNewsletter(ctx context.Context, newsletterId id.ID) error
+	GetNewslettersInfo(ctx context.Context, limit int) ([]*svcmodel.NewsletterInfo, error)
+	UpdateNewsletter(ctx context.Context, newsletterId id.ID, name, description string) (*svcmodel.BaseNewsletter, error)
 }
