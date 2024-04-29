@@ -1,14 +1,14 @@
 openapi: 3.0.3
 info:
-  title: EXAMPLE OPENAPI User management service
-  description: User management service allowing to manage users.
-  version: 0.0.0
+  title: Newsletter API
+  version: 1.0.0
+  description: API for managing newsletters, subscriptions, and posts.
 servers:
-  - url: http://localhost
-    description: Localhost server running on HTTP.
+  - url: http://localhost:8080/api/v1
+
 
 paths:
-  "/ping":
+  /ping:
     get:
       description: Health check
       operationId: Ping
@@ -18,7 +18,249 @@ paths:
           description: It's ALIVE (a.k.a. service is up and running)
         "400":
           description: Invalid request
-  "/users": {
-    # TODO;
-  }
-components: {}
+  /editor/register:
+    post:
+      summary: Registers a new editor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Editor'
+      responses:
+        '201':
+          description: Editor registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Editor'
+
+  /editor/login:
+    post:
+      summary: Login for an editor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Editor'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupabaseRefreshResponse'
+
+  /editor/verify:
+    get:
+      summary: Verify editor's email
+      parameters:
+        - in: query
+          name: token
+          schema:
+            type: string
+          required: true
+          description: Verification token sent to the editor's email
+      responses:
+        '200':
+          description: Email verified successfully
+
+  /editor/refresh:
+    post:
+      summary: Refresh the authentication token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupabaseRefreshPayload'
+      responses:
+        '200':
+          description: Authentication token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupabaseRefreshResponse'
+
+  /newsletter:
+    get:
+      summary: Retrieve a list of all newsletters
+      responses:
+        '200':
+          description: A list of newsletters retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NewsletterInfo'
+    post:
+      summary: Create a new newsletter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Newsletter'
+      responses:
+        '201':
+          description: Newsletter created successfully
+
+  /newsletter/{newsletterId}:
+    get:
+      summary: Retrieve a specific newsletter by ID
+      parameters:
+        - in: path
+          name: newsletterId
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Newsletter details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewsletterInfo'
+    delete:
+      summary: Delete a specific newsletter
+      parameters:
+        - in: path
+          name: newsletterId
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: Newsletter deleted successfully
+
+  /subscription/{newsletterId}/subscribe:
+    post:
+      summary: Subscribe to a newsletter
+      parameters:
+        - in: path
+          name: newsletterId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscriber'
+      responses:
+        '200':
+          description: Successfully subscribed
+
+  /subscription/{newsletterId}/unsubscribe:
+    delete:
+      summary: Unsubscribe from a newsletter
+      parameters:
+        - in: path
+          name: newsletterId
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnsubscribeRequestBody'
+      responses:
+        '200':
+          description: Successfully unsubscribed
+
+
+
+components:
+  schemas:
+    Editor:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+    Newsletter:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+    NewsletterInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        editorId:
+          type: string
+        editorEmail:
+          type: string
+    Post:
+      type: object
+      required:
+        - content
+        - newsletter_id
+      properties:
+        content:
+          type: string
+        newsletter_id:
+          type: string
+    Subscriber:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+    UnsubscribeRequestBody:
+      type: object
+      required:
+        - email
+        - verificationString
+      properties:
+        email:
+          type: string
+          format: email
+        verificationString:
+          type: string
+    SupabaseOTPPayload:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+    SupabaseRefreshPayload:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+    SupabaseRefreshResponse:
+      type: object
+      required:
+        - access_token
+        - refresh_token
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
