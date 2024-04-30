@@ -8,6 +8,11 @@ type Newsletter struct {
 	Description string `json:"description"`
 }
 
+type CreateNewsletterBody struct {
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description"`
+}
+
 type NewsletterInfo struct {
 	Id          id.ID   `json:"id"`
 	Name        string  `json:"name"`
