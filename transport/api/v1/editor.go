@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"net/http"
 	"net/url"
+	"newsletterProject/mailer"
 	"newsletterProject/pkg/id"
 	transportModel "newsletterProject/transport/api/v1/model"
 	"newsletterProject/transport/util"
@@ -180,4 +181,15 @@ func requestSessionRefresh(w http.ResponseWriter, token string) {
 	util.WriteResponseWithJsonBody(w, http.StatusOK, response)
 
 	return
+}
+
+func (h *Handler) ShowJWTPage(w http.ResponseWriter, _ *http.Request) {
+	page, err := mailer.GetShowJWTPageBody()
+	if err != nil {
+		util.WriteResponse(w, http.StatusInternalServerError, "Error generating page: "+err.Error())
+		return
+	}
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(page))
 }

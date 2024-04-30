@@ -12,6 +12,7 @@ const (
 	unsubscribePageTemplateName  = "unsubscribePage"
 	subscribeConfirmTemplateName = "subscribeConfirmation"
 	newPostTemplateName          = "newPost"
+	showJWTPageTemplateName      = "showJWTPage"
 )
 
 func getTemplatePath(name string) string {
@@ -76,6 +77,17 @@ func GetNewPostBody(newsletter *model.Newsletter, post *model.Post, unsubscribeL
 	t, _ := template.ParseFiles(templatePath)
 	var body bytes.Buffer
 	if err := t.Execute(&body, data); err != nil {
+		return "", err
+	}
+	return body.String(), nil
+}
+
+func GetShowJWTPageBody() (string, error) {
+	templatePath := getTemplatePath(showJWTPageTemplateName)
+	t, _ := template.ParseFiles(templatePath)
+	var body bytes.Buffer
+	err := t.Execute(&body, nil)
+	if err != nil {
 		return "", err
 	}
 	return body.String(), nil
