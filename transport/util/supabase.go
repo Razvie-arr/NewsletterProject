@@ -13,12 +13,8 @@ import (
 
 var cfg = config.MustLoadConfig()
 
-func PostSupabaseOTPRequest(email string) (int, error) {
-	body := model.SupabaseOTPPayload{
-		Email: email,
-	}
-
-	jsonBytes, err := json.Marshal(body)
+func PostSupabaseOTPRequest(payload *model.SupabaseOTPPayload) (int, error) {
+	jsonBytes, err := json.Marshal(payload)
 	if err != nil {
 		return 0, errors.New("Error marshalling JSON: " + err.Error())
 	}

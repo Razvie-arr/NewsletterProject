@@ -28,13 +28,29 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate the payload
+	if err := validator.New().Struct(&transportEditor); err != nil {
+		util.WriteResponse(w, http.StatusBadRequest, "Error validating request body: "+err.Error())
+		return
+	}
+
 	editor, err := h.service.GetEditorByEmail(r.Context(), transportEditor.Email)
 	if err != nil {
 		util.WriteResponse(w, http.StatusNotFound, "Editor not found")
 		return
 	}
 
-	if statusCode, err := requestOTP(editor.Email); err != nil {
+	payload := transportModel.SupabaseOTPPayload{
+		Email: editor.Email,
+	}
+
+	// Validate the payload
+	if err := validator.New().Struct(&payload); err != nil {
+		util.WriteResponse(w, http.StatusBadRequest, "Error validating payload body: "+err.Error())
+		return
+	}
+
+	if statusCode, err := requestOTP(&payload); err != nil {
 		util.WriteErrResponse(w, statusCode, err)
 		return
 	}
@@ -63,17 +79,17 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if statusCode, err := requestOTP(payload.Email); err != nil {
+	if statusCode, err := requestOTP(&payload); err != nil {
 		util.WriteErrResponse(w, statusCode, err)
 		return
 	}
 
-	util.WriteResponse(w, http.StatusOK, "registration successful")
+	util.WriteResponse(w, http.StatusOK, "registration request successful")
 	return
 }
 
-func requestOTP(email string) (int, error) {
-	statusCode, err := util.PostSupabaseOTPRequest(email)
+func requestOTP(payload *transportModel.SupabaseOTPPayload) (int, error) {
+	statusCode, err := util.PostSupabaseOTPRequest(payload)
 	if statusCode != 200 && err != nil {
 		return statusCode, errors.New("Error sending request to supabase: " + err.Error())
 	}
