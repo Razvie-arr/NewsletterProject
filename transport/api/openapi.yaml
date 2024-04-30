@@ -1,14 +1,15 @@
 openapi: 3.0.3
 info:
   title: Newsletter API
-  version: 1.0.0
+  version: 1.0.1
   description: API for managing newsletters, subscriptions, and posts.
 servers:
   - url: http://localhost:8080/api/v1
-
-
+    description: API Server for most endpoints
 paths:
   /ping:
+    servers:
+      - url: http://localhost:8080/
     get:
       description: Health check
       operationId: Ping
@@ -18,6 +19,44 @@ paths:
           description: It's ALIVE (a.k.a. service is up and running)
         "400":
           description: Invalid request
+  /version:
+    servers:
+      - url: http://localhost:8080/
+    get:
+      summary: Retrieves the version of the service
+      operationId: getVersion
+      responses:
+        '200':
+          description: Version retrieved successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /api/openapi.yaml:
+    servers:
+      - url: http://localhost:8080/
+    get:
+      summary: Retrieves the OpenAPI documentation
+      operationId: getOpenAPIDoc
+      responses:
+        '200':
+          description: OpenAPI documentation retrieved successfully
+          content:
+            application/x-yaml:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
   /editor/register:
     post:
       summary: Registers a new editor
@@ -26,32 +65,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Editor'
-      responses:
-        '201':
-          description: Editor registered successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Editor'
-
-  /editor/login:
-    post:
-      summary: Login for an editor
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Editor'
+              $ref: '#/components/schemas/SupabaseOTPPayload'
       responses:
         '200':
-          description: Login successful
+          description: Editor registered successfully
           content:
-            application/json:
+            text/plain:
               schema:
-                $ref: '#/components/schemas/SupabaseRefreshResponse'
-
+                $ref: '#/components/schemas/Response'
+        '400':
+          description: Bad request (e.g. wrong body)
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
   /editor/verify:
     get:
       summary: Verify editor's email
@@ -65,11 +92,52 @@ paths:
       responses:
         '200':
           description: Email verified successfully
-
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '500':
+          description: Bad request (e.g. wrong token)
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /editor/login:
+    post:
+      summary: Login for an editor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Editor'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '400':
+          description: Bad request (e.g. wrong body)
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '404':
+          description: Not found (e.g. editor not found)
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
   /editor/refresh:
     post:
-      summary: Refresh the authentication token
+      security:
+        - BearerAuth: [ ]
+      summary: Refreshes the session
+      operationId: refresh
       requestBody:
+        description: Refresh token
         required: true
         content:
           application/json:
@@ -77,27 +145,106 @@ paths:
               $ref: '#/components/schemas/SupabaseRefreshPayload'
       responses:
         '200':
-          description: Authentication token refreshed
+          description: Session refreshed successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupabaseRefreshResponse'
-
-  /newsletter:
-    get:
-      summary: Retrieve a list of all newsletters
+                $ref: '#/components/schemas/Response'
+        '400':
+          description: Error reading request body or validating request body
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /subscription/{newsletterId}:
+    post:
+      security:
+        - BearerAuth: [ ]
+      summary: Subscribes a user to a newsletter
+      operationId: subscribe
+      parameters:
+        - name: newsletterId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Subscriber information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscriber'
       responses:
         '200':
-          description: A list of newsletters retrieved successfully
+          description: Subscription successful
           content:
-            application/json:
+            text/plain:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/NewsletterInfo'
-    post:
-      summary: Create a new newsletter
+                $ref: '#/components/schemas/Response'
+        '400':
+          description: Error reading request body or validating request body
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+    delete:
+      security:
+        - BearerAuth: [ ]
+      summary: Unsubscribes a user from a newsletter
+      operationId: unsubscribe
+      parameters:
+        - name: newsletterId
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
+        description: Unsubscribe request body
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnsubscribeRequestBody'
+      responses:
+        '200':
+          description: Unsubscribed successfully
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '400':
+          description: Error reading request body or validating request body
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /newsletter:
+    post:
+      security:
+        - BearerAuth: [ ]
+      summary: Creates a newsletter
+      operationId: createNewsletter
+      requestBody:
+        description: Newsletter information
         required: true
         content:
           application/json:
@@ -106,75 +253,195 @@ paths:
       responses:
         '201':
           description: Newsletter created successfully
-
-  /newsletter/{newsletterId}:
-    get:
-      summary: Retrieve a specific newsletter by ID
-      parameters:
-        - in: path
-          name: newsletterId
-          schema:
-            type: string
-          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Newsletter'
+        '400':
+          description: Error reading request body or validating request body
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+    patch:
+      security:
+        - BearerAuth: [ ]
+      summary: Updates a newsletter
+      operationId: updateNewsletter
+      requestBody:
+        description: Newsletter information
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Newsletter'
       responses:
         '200':
-          description: Newsletter details retrieved successfully
+          description: Newsletter updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Newsletter'
+        '400':
+          description: Error reading request body or validating request body
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+    get:
+      summary: Retrieves all newsletters
+      operationId: getNewsletters
+      responses:
+        '200':
+          description: Newsletters retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NewsletterInfo'
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /newsletter/{newsletterId}:
+    delete:
+      security:
+        - BearerAuth: [ ]
+      summary: Deletes a newsletter
+      operationId: deleteNewsletter
+      parameters:
+        - name: newsletterId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Newsletter deleted successfully
+        '400':
+          description: Invalid newsletter ID
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '404':
+          description: Newsletter not found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+    get:
+      summary: Retrieves a newsletter by ID
+      operationId: getNewsletterById
+      parameters:
+        - name: newsletterId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Newsletter retrieved successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NewsletterInfo'
-    delete:
-      summary: Delete a specific newsletter
-      parameters:
-        - in: path
-          name: newsletterId
-          schema:
-            type: string
-          required: true
+        '400':
+          description: Invalid newsletter ID
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '404':
+          description: Newsletter not found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /newsletter/unsubscribe:
+    get:
+      summary: Unsubscribe page
+      operationId: unsubscribePage
       responses:
-        '204':
-          description: Newsletter deleted successfully
-
-  /subscription/{newsletterId}/subscribe:
+        '200':
+          description: Unsubscribe page retrieved successfully
+        '500':
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+  /post:
     post:
-      summary: Subscribe to a newsletter
-      parameters:
-        - in: path
-          name: newsletterId
-          schema:
-            type: string
-          required: true
+      security:
+        - BearerAuth: [ ]
+      summary: Publishes a post
+      operationId: publishPost
       requestBody:
+        description: Post information
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Subscriber'
+              $ref: '#/components/schemas/Post'
       responses:
         '200':
-          description: Successfully subscribed
-
-  /subscription/{newsletterId}/unsubscribe:
-    delete:
-      summary: Unsubscribe from a newsletter
-      parameters:
-        - in: path
-          name: newsletterId
-          schema:
-            type: string
-          required: true
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UnsubscribeRequestBody'
-      responses:
-        '200':
-          description: Successfully unsubscribed
-
-
-
+          description: Post published successfully
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '400':
+          description: Error reading request body or validating request body
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '403':
+          description: Editor is not the owner of the newsletter
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '404':
+          description: Newsletter not found
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
+        '500':
+          description: Internal server error or email not sent to all users
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
 components:
   schemas:
     Editor:
@@ -187,47 +454,54 @@ components:
           format: email
     Newsletter:
       type: object
-      required:
-        - id
-        - name
       properties:
         id:
           type: string
+          format: uuid
+          description: The ID of the newsletter
         name:
           type: string
+          description: The name of the newsletter
         description:
           type: string
+          description: The description of the newsletter
+      required:
+        - id
+        - name
     NewsletterInfo:
       type: object
       properties:
         id:
           type: string
+          format: uuid
+          description: The ID of the newsletter
         name:
           type: string
+          description: The name of the newsletter
         description:
           type: string
+          description: The description of the newsletter
         editorId:
           type: string
+          format: uuid
+          description: The ID of the editor
         editorEmail:
           type: string
+          format: email
+          description: The email of the editor
     Post:
       type: object
-      required:
-        - content
-        - newsletter_id
       properties:
+        newsletterId:
+          type: string
+          format: uuid
+          description: The ID of the newsletter
         content:
           type: string
-        newsletter_id:
-          type: string
-    Subscriber:
-      type: object
+          description: The content of the post
       required:
-        - email
-      properties:
-        email:
-          type: string
-          format: email
+        - newsletterId
+        - content
     UnsubscribeRequestBody:
       type: object
       required:
@@ -264,3 +538,18 @@ components:
           type: string
         refresh_token:
           type: string
+    Subscriber:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          description: The email of the subscriber
+      required:
+        - email
+    Response:
+      type: object
+      properties:
+        message:
+          type: string
+          description: The response message
