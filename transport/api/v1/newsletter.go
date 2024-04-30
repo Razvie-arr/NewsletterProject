@@ -14,26 +14,32 @@ import (
 )
 
 func (h *Handler) CreateNewsletter(w http.ResponseWriter, r *http.Request) {
-	editorId := r.Context().Value("editor_id")
-	var newsletter model.Newsletter
-	if err := json.NewDecoder(r.Body).Decode(&newsletter); err != nil {
+	editorContextId := r.Context().Value("editor_id")
+	var newsletterBody model.CreateNewsletterBody
+	if err := json.NewDecoder(r.Body).Decode(&newsletterBody); err != nil {
 		util.WriteErrResponse(w, http.StatusBadRequest, errors.New("invalid body"))
 		return
 	}
-	editorIdUUID, err := uuid.Parse(editorId.(string))
+	editorIdUUID, err := uuid.Parse(editorContextId.(string))
 	if err != nil {
 		util.WriteErrResponse(w, http.StatusBadRequest, errors.New("invalid credentials"))
 		return
 	}
-	newsletter.Id = id.ID(editorIdUUID)
-
+	// Check if editor exists
+	_, err = h.service.GetEditor(r.Context(), id.ID(editorIdUUID))
+	if err != nil {
+		util.WriteErrResponse(w, http.StatusNotFound, errors.New("invalid credentials, verify that you are logged in"))
+		return
+	}
 	// Validate the newsletter
-	if err := validator.New().Struct(&newsletter); err != nil {
+	if err := validator.New().Struct(&newsletterBody); err != nil {
 		util.WriteErrResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
-	createdNewsletter, err := h.service.CreateNewsletter(r.Context(), newsletter.Name, newsletter.Description, newsletter.Id)
+	editorId := id.ID(editorIdUUID)
+
+	createdNewsletter, err := h.service.CreateNewsletter(r.Context(), newsletterBody.Name, newsletterBody.Description, editorId)
 	if err != nil {
 		util.WriteErrResponse(w, http.StatusInternalServerError, err)
 		return

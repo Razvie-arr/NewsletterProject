@@ -33,7 +33,10 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	requestOTP(w, editor.Email)
+	if statusCode, err := requestOTP(editor.Email); err != nil {
+		util.WriteErrResponse(w, statusCode, err)
+		return
+	}
 
 	util.WriteResponse(w, http.StatusOK, "login successful")
 	return
@@ -53,27 +56,33 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	requestOTP(w, payload.Email)
+	//Check that email is not already in use
+	if _, err := h.service.GetEditorByEmail(r.Context(), payload.Email); err == nil {
+		util.WriteResponse(w, http.StatusConflict, "Email already in use")
+		return
+	}
+
+	if statusCode, err := requestOTP(payload.Email); err != nil {
+		util.WriteErrResponse(w, statusCode, err)
+		return
+	}
 
 	util.WriteResponse(w, http.StatusOK, "registration successful")
 	return
 }
 
-func requestOTP(w http.ResponseWriter, email string) {
+func requestOTP(email string) (int, error) {
 	statusCode, err := util.PostSupabaseOTPRequest(email)
 	if statusCode != 200 && err != nil {
-		util.WriteResponse(w, statusCode, "Error sending request to supabase: "+err.Error())
-		return
+		return statusCode, errors.New("Error sending request to supabase: " + err.Error())
 	}
 	if err != nil {
-		util.WriteResponse(w, http.StatusInternalServerError, "Error sending request to supabase: "+err.Error())
-		return
+		return http.StatusInternalServerError, errors.New("Error sending request to supabase: " + err.Error())
 	}
 	if statusCode != 200 {
-		util.WriteResponse(w, http.StatusInternalServerError, fmt.Sprintf("Something unexpected happened: error is nil but statusCode is %d", statusCode))
-		return
+		return http.StatusInternalServerError, errors.New(fmt.Sprintf("Something unexpected happened: error is nil but statusCode is %d", statusCode))
 	}
-	return
+	return 200, nil
 }
 
 func (h *Handler) Verify(w http.ResponseWriter, r *http.Request) {
