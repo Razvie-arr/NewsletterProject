@@ -95,7 +95,7 @@ func (h *Handler) Verify(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	util.WriteResponse(w, http.StatusOK, "verification successful")
+	http.Redirect(w, r, "/api/v1/editor/showJWT", http.StatusFound)
 	return
 }
 
