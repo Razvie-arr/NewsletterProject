@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your auth key</title>
+    <style>
+        /* CSS styles for email content */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h3>Your auth key in correct format (use it in the Authorization header of your requests that require auth):</h3>
+    <div id="jwt"></div>
+</div>
+<script>
+    // Get the fragment identifier from the URL
+    const hash = window.location.hash.substring(1);
+
+    // Split the fragment identifier by & to get the individual parameters
+    const params = hash.split('&');
+
+    // Iterate over the parameters to find the access_token
+    params.forEach((param) => {
+        const [key, value] = param.split('=');
+        if (key === 'access_token') {
+            // Display the JWT
+            document.getElementById('jwt').innerText = `Bearer ${value}`;
+        }
+    })
+</script>
+</body>
+</html>

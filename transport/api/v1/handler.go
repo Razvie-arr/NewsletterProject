@@ -34,6 +34,7 @@ func (h *Handler) initRouter() {
 		r.Get("/verify", h.Verify)
 		r.Post("/login", h.Login)
 		r.With(authenticate).Post("/refresh", h.Refresh)
+		r.Get("/showJWT", h.ShowJWTPage)
 	})
 
 	r.Route("/subscription", func(r chi.Router) {

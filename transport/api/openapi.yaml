@@ -162,6 +162,19 @@ paths:
             text/plain:
               schema:
                 $ref: '#/components/schemas/Response'
+  /editor/showJWT:
+    get:
+      summary: Show JWT token page from fragment in browser
+      operationId: JWTPage
+      responses:
+        '200':
+          description: JWT page retrieved successfully
+        '500':
+          description: Internal server error - missing HTML file
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/Response'
   /subscription/{newsletterId}:
     post:
       security:
