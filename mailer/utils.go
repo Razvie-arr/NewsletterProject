@@ -83,7 +83,10 @@ func GetNewPostBody(newsletter *model.Newsletter, post *model.Post, unsubscribeL
 
 func GetShowJWTPageBody() (string, error) {
 	templatePath := getTemplatePath(showJWTPageTemplateName)
-	t, _ := template.ParseFiles(templatePath)
+	t, parseError := template.ParseFiles(templatePath)
+	if parseError != nil {
+		return "Error with template parsing with path" + templatePath, parseError
+	}
 	var body bytes.Buffer
 	err := t.Execute(&body, nil)
 	if err != nil {
