@@ -57,8 +57,7 @@
 
 <script>
     function confirmUnsubscribe(newsletterId, email, verificationString) {
-        // TODO: change to not localhost (also won't work if port is different)
-        const url = `http://localhost:8080/api/v1/subscription/${newsletterId}`;
+        const url = `http://16.16.58.152:443/${newsletterId}`;
         const bodyParams = {
             email,
             verificationString,

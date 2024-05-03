@@ -21,8 +21,7 @@ func getTemplatePath(name string) string {
 }
 
 func GetUnsubscribeLink(newsletterId, subscriberMail, verificationString string) string {
-	// TODO: change to not localhost
-	return "http://localhost:" + os.Getenv("PORT") + "/api/v1/newsletter/unsubscribe?newsletterId=" + newsletterId + "&email=" + subscriberMail + "&verificationString=" + verificationString
+	return "http://16.16.58.152:" + os.Getenv("PORT") + "/api/v1/newsletter/unsubscribe?newsletterId=" + newsletterId + "&email=" + subscriberMail + "&verificationString=" + verificationString
 }
 
 func GetUnsubscribePageBody(newsletterId, subscriberMail, verificationString string) (string, error) {
