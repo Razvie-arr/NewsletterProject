@@ -18,7 +18,7 @@ func NewResendMailer(apiKey string) *ResendMailer {
 
 func (r *ResendMailer) SendEmail(to []string, subject, body string) error {
 	params := &resend.SendEmailRequest{
-		// TODO: Use different from address?
+		// TODO: Use the registered domain here after we get it
 		From:    "newsletter@resend.dev",
 		To:      to,
 		Subject: subject,

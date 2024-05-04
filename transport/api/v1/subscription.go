@@ -61,10 +61,12 @@ func (h *Handler) Subscribe(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// Subscription was successful, but email was not sent
 		util.WriteResponse(w, http.StatusOK, subscriptionSuccessfulNoEmailSent)
+		return
 	}
 	if err := h.service.SendEmail(to, subject, body); err != nil {
 		// Subscription was successful, but email was not sent
 		util.WriteResponse(w, http.StatusOK, subscriptionSuccessfulNoEmailSent)
+		return
 	}
 
 	util.WriteResponse(w, http.StatusOK, subscriptionSuccessful)
