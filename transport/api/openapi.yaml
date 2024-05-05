@@ -4,12 +4,12 @@ info:
   version: 1.0.1
   description: API for managing newsletters, subscriptions, and posts.
 servers:
-  - url: http://localhost:8080/api/v1
+  - url: http://16.16.58.152:443/api/v1
     description: API Server for most endpoints
 paths:
   /ping:
     servers:
-      - url: http://localhost:8080/
+      - url: http://16.16.58.152:443/
     get:
       description: Health check
       operationId: Ping
@@ -21,7 +21,7 @@ paths:
           description: Invalid request
   /version:
     servers:
-      - url: http://localhost:8080/
+      - url: http://16.16.58.152:443/
     get:
       summary: Retrieves the version of the service
       operationId: getVersion
@@ -40,7 +40,7 @@ paths:
                 $ref: '#/components/schemas/Response'
   /api/openapi.yaml:
     servers:
-      - url: http://localhost:8080/
+      - url: http://16.16.58.152:443/
     get:
       summary: Retrieves the OpenAPI documentation
       operationId: getOpenAPIDoc

@@ -17,7 +17,7 @@ import (
 	httpx "go.strv.io/net/http"
 )
 
-var version = "v0.0.0"
+var version = "v1.0.1"
 
 func main() {
 	ctx := context.Background()
