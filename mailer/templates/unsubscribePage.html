@@ -57,7 +57,7 @@
 
 <script>
     function confirmUnsubscribe(newsletterId, email, verificationString) {
-        const url = `http://16.16.58.152:443/${newsletterId}`;
+        const url = `http://16.16.58.152:443/api/v1/subscription/${newsletterId}`;
         const bodyParams = {
             email,
             verificationString,
